@@ -1,14 +1,15 @@
 package com.serviceforge.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
 import com.serviceforge.data.MockDataStore;
 import com.serviceforge.model.Job;
 import com.serviceforge.model.JobStatus;
 import com.serviceforge.model.Technician;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Feature 1 — Technician Availability Calendar.
@@ -47,13 +48,8 @@ public class TechnicianAvailabilityService {
     }
 
     /**
-     * Books a new job for a technician.
-     *
-     * KNOWN ISSUE (see pipeline/features/feature-1-technician-availability.md — "Known issue"):
-     * this method is supposed to reject a booking that overlaps an existing one for the same
-     * technician, but the check below only compares exact start times. Two jobs with different
-     * but overlapping start times are currently accepted silently instead of being rejected with
-     * a conflict error. Fixing this should not remove or ignore the travel-buffer decision above.
+     * Books a new job for a technician, rejecting bookings whose travel-buffered interval
+     * genuinely overlaps an existing job for the same technician.
      */
     public Job bookJob(Long technicianId, String customerName, LocalDateTime startTime, LocalDateTime endTime) {
         Technician technician = dataStore.findTechnician(technicianId)
@@ -61,15 +57,17 @@ public class TechnicianAvailabilityService {
 
         List<Job> existingJobs = dataStore.getJobsForTechnician(technicianId);
 
+        LocalDateTime bufferedEnd = endTime.plusMinutes(TRAVEL_BUFFER_MINUTES);
+
         boolean hasConflict = existingJobs.stream()
-                .anyMatch(existing -> existing.getStartTime().equals(startTime));
-        // ^ Bug: this only catches an exact start-time match. It does not detect a genuine
-        //   interval overlap (e.g. an existing 9:00-11:00 job and a new 10:00-12:00 job for the
-        //   same technician), so overlapping bookings are silently accepted.
+                .anyMatch(existing -> {
+                    LocalDateTime existingBufferedEnd = existing.getEndTime().plusMinutes(TRAVEL_BUFFER_MINUTES);
+                    return startTime.isBefore(existingBufferedEnd) && existing.getStartTime().isBefore(bufferedEnd);
+                });
 
         if (hasConflict) {
             throw new IllegalStateException(
-                    "Technician " + technician.getName() + " already has a job at " + startTime);
+                    "Technician " + technician.getName() + " already has a job that conflicts with " + startTime);
         }
 
         Job job = new Job(dataStore.nextJobId(), technicianId, customerName, startTime, endTime, JobStatus.SCHEDULED);
