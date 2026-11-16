@@ -12,6 +12,6 @@ Decisions made while building Feature 1 that later features may need to retrieve
 
 ## Decision: overlap detection compares exact start times, not intervals
 
-**What was decided (and should probably be reconsidered):** the current overlap check in `bookJob(...)` rejects a new booking only if its start time exactly matches an existing booking's start time. It does not check whether the two time ranges genuinely overlap.
+**Status: fixed.** The original overlap check in `bookJob(...)` only rejected a new booking when its start time exactly matched an existing booking's start time. It did not check whether the two time ranges genuinely overlap.
 
-**Why it matters:** this is a live bug, not a design choice anyone defended. It means two jobs with different-but-overlapping start times for the same technician are both silently accepted. Anything that assumes "a technician's booked slots never overlap" is currently assuming something the code doesn't guarantee.
+**What changed:** `bookJob(...)` now rejects a booking whenever its travel-buffered interval genuinely overlaps an existing job's travel-buffered interval for the same technician (`startTime < existingEnd+buffer && existingStart < newEnd+buffer`), per the 45-minute travel-buffer decision above. See `pipeline/bugs_finding/bug-findings.md` for the full root-cause writeup and regression tests in `TechnicianAvailabilityServiceTest`.

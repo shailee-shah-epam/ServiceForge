@@ -17,7 +17,7 @@
 
 ## Known issue
 
-The Definition of Done above says overlapping bookings must be rejected. As shipped, **this feature does not fully do that** — see `TechnicianAvailabilityService.bookJob(...)` in the backend. This is intentional: it is the subject of the first exercise anyone doing agent-native work on this repo will run. See `pipeline/decisions/feature-1-decisions.md` for the decision this bug relates to (the travel-buffer policy), which the fix should not break.
+Fixed — see `pipeline/bugs_finding/bug-findings.md` and `pipeline/decisions/feature-1-decisions.md`. Overlap detection in `TechnicianAvailabilityService.bookJob(...)` now checks genuine interval overlap (including the 45-minute travel buffer) instead of only an exact start-time match.
 
 ## Artifacts this feature touches
 

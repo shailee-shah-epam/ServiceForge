@@ -29,8 +29,8 @@ npm start                    # serves http://localhost:4200
 | What | Where |
 |---|---|
 | The orchestration pipeline (tool-agnostic, read this first) | `pipeline/orchestration.md` |
-| Agent role definitions (BA / Developer / Tester) | `.claude/agents/*.md` — plain markdown with a small YAML header for Claude Code; readable as-is by any tool |
-| Skills (reusable how-to knowledge) | `.claude/skills/*/SKILL.md` |
+| Agent role definitions (BA / Developer / Tester) | `.claude/agents/*.md` and `.github/agents/*.agent.md` |
+| Skills (reusable how-to knowledge) | `.claude/skills/*/SKILL.md` and `.github/skills/*/SKILL.md` |
 | Feature specifications (one file per feature — see the [feature-spec convention](pipeline/features/feature-1-technician-availability.md)) | `pipeline/features/feature-N-<slug>.md` |
 | Decisions made while building a feature (what later features must remember) | `pipeline/decisions/feature-N-decisions.md` |
 | Project-wide rules | added under `pipeline/rules/` as they're written — none exist yet; the first one gets created the first time a shipped bug needs a standing rule against recurring |
@@ -44,5 +44,5 @@ npm start                    # serves http://localhost:4200
 ## Cross-tool notes
 
 - **Codex / any AGENTS.md-aware CLI agent:** you're already reading the right file. Go to `pipeline/orchestration.md` next.
-- **GitHub Copilot:** see `.github/copilot-instructions.md` and the reusable prompt files in `.github/prompts/`.
+- **GitHub Copilot:** see `.github/copilot-instructions.md`, the agents in `.github/agents/`, and the reusable prompt files in `.github/prompts/`.
 - **Claude Code:** see `CLAUDE.md` — it imports this file and adds the subagent/skill wiring specific to Claude Code.
